@@ -49,7 +49,7 @@ commentStyle = CommentStyle
   { _commentStart = "/*"
   , _commentEnd   = "*/"
   , _commentLine  = "#"
-  , _commentNesting = True
+  , _commentNesting = False
   }
 
 identStyle :: CharParsing m => IdentifierStyle m
