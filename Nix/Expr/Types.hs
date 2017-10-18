@@ -100,6 +100,8 @@ data Params r
   | ParamSet !(ParamSet r) !(Maybe Text)
   -- ^ Explicit parameters (argument must be a set). Might specify a name
   -- to bind to the set in the function body.
+  | ParamAnnot !(Params r) !Text
+  -- ^ Annotated pattern, like in @p /*: Int*/: p@
   deriving (Ord, Eq, Generic, Typeable, Data, Functor, Show,
             Foldable, Traversable)
 
@@ -243,6 +245,7 @@ data NBinaryOp
 paramName :: Params r -> Maybe Text
 paramName (Param n) = Just n
 paramName (ParamSet _ n) = n
+paramName (ParamAnnot p _) = paramName p
 
 $(deriveShow1 ''NExprF)
 $(deriveShow1 ''NString)

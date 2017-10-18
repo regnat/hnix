@@ -56,13 +56,15 @@ valueText = cata phi where
     phi (NVLiteralPath p) = Text.pack p
 
 buildArgument :: Params (NValue m) -> NValue m -> NValue m
-buildArgument paramSpec arg = either error (Fix . NVSet) $ case paramSpec of
-    Param name -> return $ Map.singleton name arg
-    ParamSet (FixedParamSet s) Nothing -> lookupParamSet s
-    ParamSet (FixedParamSet s) (Just name) ->
-      Map.insert name arg <$> lookupParamSet s
-    ParamSet _ _ -> error "Can't yet handle variadic param sets"
+buildArgument paramSpec arg = either error (Fix . NVSet) $ bindsMap paramSpec
   where
+    bindsMap pSpec = case pSpec of
+      Param name -> return $ Map.singleton name arg
+      ParamSet (FixedParamSet s) Nothing -> lookupParamSet s
+      ParamSet (FixedParamSet s) (Just name) ->
+        Map.insert name arg <$> lookupParamSet s
+      ParamSet _ _ -> error "Can't yet handle variadic param sets"
+      ParamAnnot p _ -> bindsMap p
     go env k def = maybe (Left err) return $ Map.lookup k env <|> def
       where err = "Could not find " ++ show k
     lookupParamSet s = case arg of
