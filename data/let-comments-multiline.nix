@@ -1,9 +1,7 @@
 let
   b.a = 3; /*
    this is a multiline comment
-   /* we can also nest these comments
-    */ /*
-   */
+   /* we can't nest these comments
   */
   b.c = { e = {}; };
   /* just some more comments
