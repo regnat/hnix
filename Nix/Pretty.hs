@@ -78,11 +78,11 @@ prettyParams (Param n) = text $ unpack n
 prettyParams (ParamSet s mname) = prettyParamSet s <> case mname of
   Nothing -> empty
   Just name -> text "@" <> text (unpack name)
-prettyParams (ParamAnnot p annot) = withAnnot annot (prettyParams p)
+prettyParams (ParamAnnot p id annot) = withAnnot id annot (prettyParams p)
 
-withAnnot :: Text -> Doc -> Doc
-withAnnot annot doc =
-  parens $ doc <> text "/*: " <> text (unpack annot) <> text " */"
+withAnnot :: Char -> Text -> Doc -> Doc
+withAnnot identifier annot doc =
+  parens $ doc <> text "/*" <> text [identifier] <> text (unpack annot) <> text " */"
 
 prettyParamSet :: ParamSet NixDoc -> Doc
 prettyParamSet params = lbrace <+> middle <+> rbrace
