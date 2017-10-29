@@ -82,7 +82,7 @@ prettyParams (ParamAnnot p id annot) = withAnnot id annot (prettyParams p)
 
 withAnnot :: Char -> Text -> Doc -> Doc
 withAnnot identifier annot doc =
-  parens $ doc <> text "/*" <> text [identifier] <> text (unpack annot) <> text " */"
+  doc <> text " /*" <> text [identifier] <> text (unpack annot) <> text "*/"
 
 prettyParamSet :: ParamSet NixDoc -> Doc
 prettyParamSet params = lbrace <+> middle <+> rbrace
