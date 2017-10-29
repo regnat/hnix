@@ -161,6 +161,8 @@ case_lambda_pattern = do
     Fix $ NAbs (variadic vargs (Just "a")) (mkSym "c")
   assertParseString "{...}: 1" $
     Fix $ NAbs (variadic mempty Nothing) (mkInt 1)
+  assertParseString "x /*: Int */: x" $
+    Fix $ NAbs (ParamAnnot (Param "x") ':' " Int ") (mkSym "x")
   assertParseFail "a@b: a"
   assertParseFail "{a}@{b}: a"
  where
