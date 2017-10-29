@@ -212,7 +212,16 @@ nixString = doubleQuoted <|> indented <?> "string"
 
 -- | Gets all of the arguments for a function.
 argExpr :: Parser (Params NExprLoc)
-argExpr = choice [atLeft, onlyname, atRight] <* symbolic ':' where
+argExpr = do
+  args <- choice [atLeft, onlyname, atRight]
+  annot <- optional annot_comment
+  _ <- symbolic ':'
+  return $
+    case annot of
+      Nothing -> args
+      Just (id, text) ->
+        ParamAnnot args id text
+  where
   -- An argument not in curly braces. There's some potential ambiguity
   -- in the case of, for example `x:y`. Is it a lambda function `x: y`, or
   -- a URI `x:y`? Nix syntax says it's the latter. So we need to fail if
@@ -254,6 +263,17 @@ argExpr = choice [atLeft, onlyname, atRight] <* symbolic ':' where
         pair <- liftA2 (,) identifier (optional $ symbolic '?' *> nixExprLoc)
         -- Either return this, or attempt to get a comma and restart.
         option (acc ++ [pair], False) $ symbolic ',' >> go (acc ++ [pair])
+
+annot_comment :: Parser (Char, Text)
+annot_comment = do
+  _ <- string "/*"
+  identifier <- parseCommentIdentifier
+  body <- many inCommentChar
+  _ <- string "*/"
+  return (identifier, pack body)
+  where
+    inCommentChar :: Parser Char
+    inCommentChar = notFollowedBy (string "*/") *> anyChar
 
 nixBinders :: Parser [Binding NExprLoc]
 nixBinders = (inherit <|> namedVar) `endBy` symbolic ';' where

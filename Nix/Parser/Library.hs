@@ -38,19 +38,35 @@ newtype NixParser p a = NixParser { runNixParser :: p a }
   deriving (Functor, Applicative, Alternative, Monad, MonadPlus, Parsing, CharParsing, LookAheadParsing, Trifecta.DeltaParsing)
 
 instance TokenParsing p => TokenParsing (NixParser p) where
-  someSpace = NixParser $ buildSomeSpaceParser someSpace commentStyle
+  someSpace = NixParser $ buildNixSpaceParser someSpace
   nesting = NixParser . nesting . runNixParser
   highlight h = NixParser . highlight h . runNixParser
   semi = token $ char ';' <?> ";"
   token p = p <* whiteSpace
 
 commentStyle :: CommentStyle
-commentStyle = CommentStyle
-  { _commentStart = "/*"
-  , _commentEnd   = "*/"
-  , _commentLine  = "#"
-  , _commentNesting = False
-  }
+commentStyle = emptyCommentStyle
+
+-- | A list of chars that can be inserted directly after the start of a comment
+-- to make it a special comment
+specialCommentsIdentifiers :: String
+specialCommentsIdentifiers = ":@"
+
+parseCommentIdentifier :: CharParsing m => m Char
+parseCommentIdentifier = X.oneOf specialCommentsIdentifiers
+
+buildNixSpaceParser :: CharParsing m => m () -> m ()
+buildNixSpaceParser simpleSpace =
+  skipSome (simpleSpace <|> oneLineComment <|> multilineComment)
+  where
+    oneLineComment = try (X.string "#" <* notFollowedBy parseCommentIdentifier)
+                       *> X.skipMany (X.satisfy (/= '\n'))
+    multilineComment = try (X.string "/*" <* notFollowedBy parseCommentIdentifier)
+                         *> inComment
+    inComment = () <$ try (string "*/")
+      <|> skipSome (X.notChar '*') *> inComment
+      <|> X.char '*' *> inComment
+      <?> "end of comment"
 
 identStyle :: CharParsing m => IdentifierStyle m
 identStyle = IdentifierStyle
