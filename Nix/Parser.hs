@@ -82,6 +82,14 @@ nixSelect term = build
   build t Nothing = t
   build t (Just (s,o)) = nSelectLoc t s o
 
+nixAnnot :: Parser NExprLoc -> Parser NExprLoc
+nixAnnot term = do
+  baseTerm <- term
+  annot <- optional annot_comment
+  case annot of
+    Nothing -> pure baseTerm
+    Just (id, txt) -> pure $ nCommentAnnot baseTerm id txt
+
 nixHasAttr :: Parser NExprLoc -> Parser NExprLoc
 nixHasAttr term = build <$> term <*> optional (reservedOp "?" *> nixSelector) where
   build :: NExprLoc -> Maybe (Ann SrcSpan (NAttrPath NExprLoc)) -> NExprLoc
@@ -90,7 +98,7 @@ nixHasAttr term = build <$> term <*> optional (reservedOp "?" *> nixSelector) wh
 
 -- | A self-contained unit.
 nixTerm :: Parser NExprLoc
-nixTerm = nixSelect $ choice
+nixTerm = nixSelect $ nixAnnot $ choice
   [ nixInt, nixBool, nixNull, nixParens, nixList, nixPath, nixSPath, nixUri
   , nixStringExpr, nixSet, nixSym ]
 
@@ -269,7 +277,7 @@ annot_comment = do
   _ <- string "/*"
   identifier <- parseCommentIdentifier
   body <- many inCommentChar
-  _ <- string "*/"
+  _ <- string "*/" <* whiteSpace
   return (identifier, pack body)
   where
     inCommentChar :: Parser Char

@@ -178,5 +178,8 @@ prettyNix = withoutParens . cata phi where
     text "with"  <+> withoutParens scope <> semi <+> withoutParens body
   phi (NAssert cond body) = leastPrecedence $
     text "assert" <+> withoutParens cond <> semi <+> withoutParens body
+  phi (NAnnot e id txt)
+    = leastPrecedence $
+    wrapParens appOp e <+> text "/*" <> char id <> text (unpack txt) <>  text "*/"
 
   recPrefix = text "rec" <> space

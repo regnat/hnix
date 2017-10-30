@@ -72,6 +72,7 @@ data NExprF r
   -- evaluate the second argument.
   | NAssert !r !r
   -- ^ Assert that the first returns true before evaluating the second.
+  | NAnnot !r !Char !Text
   deriving (Ord, Eq, Generic, Typeable, Data, Functor, Foldable, Traversable, Show)
 
 -- | We make an `IsString` for expressions, where the string is interpreted

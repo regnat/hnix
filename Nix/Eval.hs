@@ -195,6 +195,7 @@ evalExpr = cata phi
         -- set
         args <- traverse ($ env) a
         return $ Fix $ NVFunction args b
+    phi (NAnnot e _ _) = e
 
 evalString :: Monad m
            => NValue m -> NString (NValue m -> m (NValue m)) -> m Text
