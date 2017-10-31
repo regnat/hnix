@@ -154,7 +154,7 @@ inheritFrom expr = Inherit (Just expr)
 
 -- | Shorthand for producing a binding of a name to an expression.
 bindTo :: Text -> NExpr -> Binding NExpr
-bindTo name val = NamedVar (mkSelector name) val
+bindTo name val = NamedVar (mkSelector name) Nothing val
 
 -- | Infix version of bindTo.
 ($=) :: Text -> NExpr -> Binding NExpr

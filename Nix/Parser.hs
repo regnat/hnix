@@ -288,7 +288,9 @@ nixBinders = (inherit <|> namedVar) `endBy` symbolic ';' where
   inherit = Inherit <$> (reserved "inherit" *> optional scope)
                     <*> many keyName
                     <?> "inherited binding"
-  namedVar = NamedVar <$> (annotated <$> nixSelector) <*> (symbolic '=' *> nixExprLoc)
+  namedVar = NamedVar <$> (annotated <$> nixSelector)
+               <*> optional annot_comment
+               <*> (symbolic '=' *> nixExprLoc)
           <?> "variable binding"
   scope = parens nixExprLoc <?> "inherit scope"
 

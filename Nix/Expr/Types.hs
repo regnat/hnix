@@ -90,7 +90,7 @@ data Annotation = Annotation !Char !Text
 
 -- | A single line of the bindings section of a let expression or of a set.
 data Binding r
-  = NamedVar !(NAttrPath r) !r
+  = NamedVar !(NAttrPath r) !(Maybe Annotation) !r
   -- ^ An explicit naming, such as @x = y@ or @x.y = z@.
   | Inherit !(Maybe r) ![NKeyName r]
   -- ^ Using a name already in scope, such as @inherit x;@ which is shorthand

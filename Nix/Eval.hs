@@ -229,7 +229,7 @@ evalBinds allowDynamic env xs = buildResult <$> sequence (concatMap go xs) where
         | otherwise = alreadyDefinedErr
 
   -- TODO: Inherit
-  go (NamedVar x y) = [liftM2 (,) (evalSelector allowDynamic env x) (y env)]
+  go (NamedVar x _ y) = [liftM2 (,) (evalSelector allowDynamic env x) (y env)]
   go _ = [] -- HACK! But who cares right now
 
 evalSelector :: Monad m => Bool -> NValue m -> NAttrPath (NValue m -> m (NValue m)) -> m [Text]

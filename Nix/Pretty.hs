@@ -97,7 +97,9 @@ prettyParamSet params = lbrace <+> middle <+> rbrace
       Just v -> text (unpack n) <+> text "?" <+> withoutParens v
 
 prettyBind :: Binding NixDoc -> Doc
-prettyBind (NamedVar n v) = prettySelector n <+> equals <+> withoutParens v <> semi
+prettyBind (NamedVar n Nothing v) = prettySelector n <+> equals <+> withoutParens v <> semi
+prettyBind (NamedVar n (Just annot) v) =
+  withAnnot annot (prettySelector n) <+> equals <+> withoutParens v <> semi
 prettyBind (Inherit s ns)
   = text "inherit" <+> scope <> fillSep (map prettyKeyName ns) <> semi
  where scope = maybe empty ((<> space) . parens . withoutParens) s
