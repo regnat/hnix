@@ -88,7 +88,7 @@ nixAnnot term = do
   annot <- optional annot_comment
   case annot of
     Nothing -> pure baseTerm
-    Just (id, txt) -> pure $ nCommentAnnot baseTerm id txt
+    Just annot -> pure $ nCommentAnnot baseTerm annot
 
 nixHasAttr :: Parser NExprLoc -> Parser NExprLoc
 nixHasAttr term = build <$> term <*> optional (reservedOp "?" *> nixSelector) where
@@ -227,8 +227,8 @@ argExpr = do
   return $
     case annot of
       Nothing -> args
-      Just (id, text) ->
-        ParamAnnot args id text
+      Just annot ->
+        ParamAnnot args annot
   where
   -- An argument not in curly braces. There's some potential ambiguity
   -- in the case of, for example `x:y`. Is it a lambda function `x: y`, or
@@ -272,13 +272,13 @@ argExpr = do
         -- Either return this, or attempt to get a comma and restart.
         option (acc ++ [pair], False) $ symbolic ',' >> go (acc ++ [pair])
 
-annot_comment :: Parser (Char, Text)
+annot_comment :: Parser Annotation
 annot_comment = do
   _ <- string "/*"
   identifier <- parseCommentIdentifier
   body <- many inCommentChar
   _ <- string "*/" <* whiteSpace
-  return (identifier, pack body)
+  return $ Annotation identifier (pack body)
   where
     inCommentChar :: Parser Char
     inCommentChar = notFollowedBy (string "*/") *> anyChar

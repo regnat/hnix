@@ -78,10 +78,10 @@ prettyParams (Param n) = text $ unpack n
 prettyParams (ParamSet s mname) = prettyParamSet s <> case mname of
   Nothing -> empty
   Just name -> text "@" <> text (unpack name)
-prettyParams (ParamAnnot p id annot) = withAnnot id annot (prettyParams p)
+prettyParams (ParamAnnot p annot) = withAnnot annot (prettyParams p)
 
-withAnnot :: Char -> Text -> Doc -> Doc
-withAnnot identifier annot doc =
+withAnnot :: Annotation -> Doc -> Doc
+withAnnot (Annotation identifier annot) doc =
   doc <> text " /*" <> text [identifier] <> text (unpack annot) <> text "*/"
 
 prettyParamSet :: ParamSet NixDoc -> Doc
@@ -178,7 +178,7 @@ prettyNix = withoutParens . cata phi where
     text "with"  <+> withoutParens scope <> semi <+> withoutParens body
   phi (NAssert cond body) = leastPrecedence $
     text "assert" <+> withoutParens cond <> semi <+> withoutParens body
-  phi (NAnnot e id txt)
+  phi (NAnnot e (Annotation id txt))
     = leastPrecedence $
     wrapParens appOp e <+> text "/*" <> char id <> text (unpack txt) <>  text "*/"
 

@@ -72,7 +72,7 @@ data NExprF r
   -- evaluate the second argument.
   | NAssert !r !r
   -- ^ Assert that the first returns true before evaluating the second.
-  | NAnnot !r !Char !Text
+  | NAnnot !r !Annotation
   deriving (Ord, Eq, Generic, Typeable, Data, Functor, Foldable, Traversable, Show)
 
 -- | We make an `IsString` for expressions, where the string is interpreted
@@ -83,6 +83,10 @@ instance IsString NExpr where
 
 -- | The monomorphic expression type is a fixed point of the polymorphic one.
 type NExpr = Fix NExprF
+
+-- | An annotation in a comment
+data Annotation = Annotation !Char !Text
+  deriving (Typeable, Data, Ord, Eq, Show)
 
 -- | A single line of the bindings section of a let expression or of a set.
 data Binding r
@@ -101,7 +105,7 @@ data Params r
   | ParamSet !(ParamSet r) !(Maybe Text)
   -- ^ Explicit parameters (argument must be a set). Might specify a name
   -- to bind to the set in the function body.
-  | ParamAnnot !(Params r) !Char !Text
+  | ParamAnnot !(Params r) !Annotation
   -- ^ Annotated pattern, like in @p /*: Int*/: p@
   -- The second argument represents the identifier of the comment
   -- (':', '\@', ...) and the third one the content of the comment
@@ -248,7 +252,7 @@ data NBinaryOp
 paramName :: Params r -> Maybe Text
 paramName (Param n) = Just n
 paramName (ParamSet _ n) = n
-paramName (ParamAnnot p _ _) = paramName p
+paramName (ParamAnnot p _) = paramName p
 
 $(deriveShow1 ''NExprF)
 $(deriveShow1 ''NString)

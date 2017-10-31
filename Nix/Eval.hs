@@ -64,7 +64,7 @@ buildArgument paramSpec arg = either error (Fix . NVSet) $ bindsMap paramSpec
       ParamSet (FixedParamSet s) (Just name) ->
         Map.insert name arg <$> lookupParamSet s
       ParamSet _ _ -> error "Can't yet handle variadic param sets"
-      ParamAnnot p _ _ -> bindsMap p
+      ParamAnnot p _ -> bindsMap p
     go env k def = maybe (Left err) return $ Map.lookup k env <|> def
       where err = "Could not find " ++ show k
     lookupParamSet s = case arg of
@@ -195,7 +195,7 @@ evalExpr = cata phi
         -- set
         args <- traverse ($ env) a
         return $ Fix $ NVFunction args b
-    phi (NAnnot e _ _) = e
+    phi (NAnnot e _) = e
 
 evalString :: Monad m
            => NValue m -> NString (NValue m -> m (NValue m)) -> m Text
